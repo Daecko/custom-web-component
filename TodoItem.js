@@ -1,22 +1,40 @@
-const template = document.createElement("template")
-template.innerHTML = `
-<style>
-    h3 { color: green }
-</style>
-<h3>
-    <slot></slot>
-</h3>
-`
-//everything put inside the web component in the html is a slot
-
-class CustomComponent extends HTMLElement {
+class CounterComponent extends HTMLElement {
     constructor() {
-        super()
-        //shadowdom (shadow) prevents changing style outside the component and prevents its own style from changing from the outside
-        const shadow = this.attachShadow({mode: "open"})
-        shadow.append(template.content.cloneNode(true))
-        
+      super();
+      this.attachShadow({ mode: 'open' });
+      this.count = 0;
+      this.shadowRoot.innerHTML = `
+        <style>
+          .counter {
+            font-size: 2rem;
+            margin-bottom: 10px;
+          }
+          button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+          }
+        </style>
+        <div class="counter">Count: ${this.count}</div>
+        <button>Increase</button>
+      `;
     }
-}
-
-customElements.define("custom-component", CustomComponent)
+  
+    connectedCallback() {
+      this.shadowRoot.querySelector('button').addEventListener('click', () => {
+        this.count++;
+        this.updateCounter();
+      });
+    }
+  
+    updateCounter() {
+      this.shadowRoot.querySelector('.counter').textContent = `Count: ${this.count}`;
+    }
+  
+    disconnectedCallback() {
+      this.shadowRoot.querySelector('button').removeEventListener('click', this.updateCounter);
+    }
+  }
+  
+  customElements.define('counter-component', CounterComponent);
+  
